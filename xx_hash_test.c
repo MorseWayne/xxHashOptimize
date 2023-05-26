@@ -110,24 +110,23 @@ uint64_t SGL_HashValue(SGL *sgl)
     register uint64_t num3 = 0;
     register uint64_t num4 = 0x61c8864e7a143579;
 
-
-    uint64_t product = 0;
-    uint64_t lastinput0 = 0;
-    uint64_t lastoutput0 = 0;
-    uint64_t lastinput1 = 0;
-    uint64_t lastoutput1 = 0;
-    uint64_t lastinput2 = 0;
-    uint64_t lastoutput2 = 0;
-    uint64_t lastinput3 = 0;
-    uint64_t lastoutput3 = 0;
-    (void)(lastinput0);
-    (void)(lastinput1);
-    (void)(lastinput2);
-    (void)(lastinput3);
-    (void)(lastoutput0);
-    (void)(lastoutput1);
-    (void)(lastoutput2);
-    (void)(lastoutput3);
+    // uint64_t product = 0;
+    // uint64_t lastinput0 = 0;
+    // uint64_t lastoutput0 = 0;
+    // uint64_t lastinput1 = 0;
+    // uint64_t lastoutput1 = 0;
+    // uint64_t lastinput2 = 0;
+    // uint64_t lastoutput2 = 0;
+    // uint64_t lastinput3 = 0;
+    // uint64_t lastoutput3 = 0;
+    // (void)(lastinput0);
+    // (void)(lastinput1);
+    // (void)(lastinput2);
+    // (void)(lastinput3);
+    // (void)(lastoutput0);
+    // (void)(lastoutput1);
+    // (void)(lastoutput2);
+    // (void)(lastoutput3);
 
 
     state.totalSize = sgl->entryCount * 8192;
@@ -140,37 +139,37 @@ uint64_t SGL_HashValue(SGL *sgl)
             // XXH64_Update_new(&state, entrybuf + offset, BYTE_PER_SECTOR_NOPI);
             const uint64_t *data64 = (uint64_t *)(entrybuf + offset);
             for (size_t i = 0; i < 8; ++i) {
-                Multi(data64[0], product, 0);
-                num1 += product;
+                (void)num1;
+                num1 += (uint64_t)(data64[0] * XXH64_PRIME_2);
+                num2 += (uint64_t)(data64[1] * XXH64_PRIME_2);
+                num3 += (uint64_t)(data64[2] * XXH64_PRIME_2);
+                num4 += (uint64_t)(data64[3] * XXH64_PRIME_2);
+
                 num1 = (uint64_t)((num1 << 31) | (num1 >> 33)) * XXH64_PRIME_1;
-                // num1 += (uint64_t)(data64[0] * XXH64_PRIME_2);
+   
                 // __asm__("ROR %[accn], %[accn], %[shift]" : [accn] "+r"(num1) : [shift] "r"((unsigned int)(33)));
                 // num1 *= XXH64_PRIME_1;
 
-
-                Multi(data64[4], product, 1);
-                num1 += product;
-                num1 = (uint64_t)((num1 << 31) | (num1 >> 33)) * XXH64_PRIME_1;
-
-                Multi(data64[1], product, 2);
-                num2 += product;
                 // num2 += (uint64_t)(data64[1] * XXH64_PRIME_2);
                 num2 = (uint64_t)((num2 << 31) | (num2 >> 33)) * XXH64_PRIME_1;
 
-                Multi(data64[5], product, 3);
-                num2 += product;
-                // num2 += (uint64_t)(data64[5] * XXH64_PRIME_2);
-                num2 = (uint64_t)((num2 << 31) | (num2 >> 33)) * XXH64_PRIME_1;
-
-
-                num3 += (uint64_t)(data64[2] * XXH64_PRIME_2);
+            
+                // num3 += (uint64_t)(data64[2] * XXH64_PRIME_2);
                 num3 = (uint64_t)((num3 << 31) | (num3 >> 33)) * XXH64_PRIME_1;
+
+                // num4 += (uint64_t)(data64[3] * XXH64_PRIME_2);
+                num4 = (uint64_t)((num4 << 31) | (num4 >> 33)) * XXH64_PRIME_1;
+
+                (void)num4;
+
+                num1 += (uint64_t)(data64[4] * XXH64_PRIME_2);
+                num1 = (uint64_t)((num1 << 31) | (num1 >> 33)) * XXH64_PRIME_1;
+
+                num2 += (uint64_t)(data64[5] * XXH64_PRIME_2);
+                num2 = (uint64_t)((num2 << 31) | (num2 >> 33)) * XXH64_PRIME_1;
 
                 num3 += (uint64_t)(data64[6] * XXH64_PRIME_2);
                 num3 = (uint64_t)((num3 << 31) | (num3 >> 33)) * XXH64_PRIME_1;
-
-                num4 += (uint64_t)(data64[3] * XXH64_PRIME_2);
-                num4 = (uint64_t)((num4 << 31) | (num4 >> 33)) * XXH64_PRIME_1;
 
                 num4 += (uint64_t)(data64[7] * XXH64_PRIME_2);
                 num4 = (uint64_t)((num4 << 31) | (num4 >> 33)) * XXH64_PRIME_1;
@@ -186,6 +185,7 @@ uint64_t SGL_HashValue(SGL *sgl)
 
     return XXH64_Digest(&state);
 }
+
 
 #include <iostream>
 #include "xxhash.h"
