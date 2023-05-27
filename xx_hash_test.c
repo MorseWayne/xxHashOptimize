@@ -5,8 +5,8 @@
 #include <string.h>
 
 #define XXH64_LANE_COUNT ((size_t)4)
-#define XXH64_SEED       ((uint64_t)0)
-#define XXH64_STEP_SIZE  ((size_t)32)
+#define XXH64_SEED ((uint64_t)0)
+#define XXH64_STEP_SIZE ((size_t)32)
 
 #define XXH64_PRIME_1 ((uint64_t)0x9E3779B185EBCA87ULL)
 #define XXH64_PRIME_2 ((uint64_t)0xC2B2AE3D27D4EB4FULL)
@@ -19,12 +19,13 @@
 /*
  * 用于保存 XXH64 算法的状态。
  */
-typedef struct {
-    uint64_t acc[XXH64_LANE_COUNT];             /* 4 个累加器。 */
-    uint8_t buffer[XXH64_STEP_SIZE];            /* 保存不满 32 字节的零散数据。 */
-    size_t bufferSize;                          /* 当前零散数据的大小。 */
-    uint64_t totalSize;                         /* 状态已经接受的数据的总大小。 */
-    bool isLarge;                               /* 状态是否已经接受了大于 32 字节的数据量。 */
+typedef struct
+{
+    uint64_t acc[XXH64_LANE_COUNT];  /* 4 个累加器。 */
+    uint8_t buffer[XXH64_STEP_SIZE]; /* 保存不满 32 字节的零散数据。 */
+    size_t bufferSize;               /* 当前零散数据的大小。 */
+    uint64_t totalSize;              /* 状态已经接受的数据的总大小。 */
+    bool isLarge;                    /* 状态是否已经接受了大于 32 字节的数据量。 */
 } XXH64State;
 
 static inline uint64_t XXH64_Round(uint64_t accn, uint64_t lane)
@@ -58,7 +59,8 @@ static inline uint64_t XXH64_FinalAcc(XXH64State *state)
     finalAcc += ROTATE_LEFT(state->acc[2], 12);
     finalAcc += ROTATE_LEFT(state->acc[3], 18);
 
-    for (size_t i = 0; i < XXH64_LANE_COUNT; i++) {
+    for (size_t i = 0; i < XXH64_LANE_COUNT; i++)
+    {
         finalAcc = XXH64_MergeAccumulator(finalAcc, state->acc[i]);
     }
 
@@ -70,10 +72,11 @@ static inline uint64_t XXH64_FinalAcc(XXH64State *state)
 static inline uint64_t XXH64_Mix(uint64_t finalAcc)
 {
     const int MIX_COUNT = 3;
-    const int MIX_SHIFT[] = { 33, 29, 32 };
-    const uint64_t MIX_MUL[] = { XXH64_PRIME_2, XXH64_PRIME_3, 1 };
+    const int MIX_SHIFT[] = {33, 29, 32};
+    const uint64_t MIX_MUL[] = {XXH64_PRIME_2, XXH64_PRIME_3, 1};
     uint64_t tmp = finalAcc;
-    for (size_t i = 0; i < MIX_COUNT; i++) {
+    for (size_t i = 0; i < MIX_COUNT; i++)
+    {
         tmp ^= tmp >> MIX_SHIFT[i];
         tmp *= MIX_MUL[i];
     }
@@ -91,93 +94,87 @@ static inline uint64_t XXH64_Digest(XXH64State *state)
     return finalAcc;
 }
 
-#define Multi(input, output, step)                  \
-    if (input != lastinput##step) {                 \
-        output = (uint64_t)(input * XXH64_PRIME_2); \
-        lastinput##step = input;                    \
-        lastoutput##step = output;                  \
-    } else {                                        \
-        output = lastoutput##step;                  \
-    }
-
 uint64_t SGL_HashValue(SGL *sgl)
 {
-    XXH64State state = {};
-   // XXH64_StateInit(&state);
+
+    // XXH64_StateInit(&state);
     // memset(&state,0,sizeof(state));
-    register uint64_t num1 = 0x60ea27eeadc0b5d6;
-    register uint64_t num2 = 0xc2b2ae3d27d4eb4f;
-    register uint64_t num3 = 0;
-    register uint64_t num4 = 0x61c8864e7a143579;
+    uint64_t num1 = 0x60ea27eeadc0b5d6;
+    uint64_t num2 = 0xc2b2ae3d27d4eb4f;
+    uint64_t num3 = 0;
+    uint64_t num4 = 0x61c8864e7a143579;
+   
 
-    // uint64_t product = 0;
-    // uint64_t lastinput0 = 0;
-    // uint64_t lastoutput0 = 0;
-    // uint64_t lastinput1 = 0;
-    // uint64_t lastoutput1 = 0;
-    // uint64_t lastinput2 = 0;
-    // uint64_t lastoutput2 = 0;
-    // uint64_t lastinput3 = 0;
-    // uint64_t lastoutput3 = 0;
-    // (void)(lastinput0);
-    // (void)(lastinput1);
-    // (void)(lastinput2);
-    // (void)(lastinput3);
-    // (void)(lastoutput0);
-    // (void)(lastoutput1);
-    // (void)(lastoutput2);
-    // (void)(lastoutput3);
-
-
-    state.totalSize = sgl->entryCount * 8192;
-    for (size_t i = 0; i < sgl->entryCount; i++) {
+    for (size_t i = 0; i < sgl->entryCount; i++)
+    {
         const uint8_t *entrybuf = sgl->entries[i].buf;
         size_t entrylen = sgl->entries[i].len;
         // __builtin_prefetch(entrybuf + 520);
-        for (size_t offset = 0; offset < entrylen; offset += 520) {
+        for (size_t offset = 0; offset < entrylen; offset += 520)
+        {
             // process current block
             // XXH64_Update_new(&state, entrybuf + offset, BYTE_PER_SECTOR_NOPI);
             const uint64_t *data64 = (uint64_t *)(entrybuf + offset);
-            for (size_t i = 0; i < 8; ++i) {
-                (void)num1;
-                num1 += (uint64_t)(data64[0] * XXH64_PRIME_2);
-                num2 += (uint64_t)(data64[1] * XXH64_PRIME_2);
-                num3 += (uint64_t)(data64[2] * XXH64_PRIME_2);
-                num4 += (uint64_t)(data64[3] * XXH64_PRIME_2);
 
-                num1 = (uint64_t)((num1 << 31) | (num1 >> 33)) * XXH64_PRIME_1;
-   
-                // __asm__("ROR %[accn], %[accn], %[shift]" : [accn] "+r"(num1) : [shift] "r"((unsigned int)(33)));
-                // num1 *= XXH64_PRIME_1;
+            for (size_t i = 0; i < 16; ++i)
+            {
+                uint64_t data1;
+                uint64_t data2;
+                uint64_t data3;
+                uint64_t data4;
+                uint64_t prime1;
+                uint64_t prime2;
 
-                // num2 += (uint64_t)(data64[1] * XXH64_PRIME_2);
-                num2 = (uint64_t)((num2 << 31) | (num2 >> 33)) * XXH64_PRIME_1;
+                asm(
+                    // load prime1
+                    "mov %x[prime1], 0xca87\n\t"
+                    "movk %x[prime1], 0x85eb, lsl 16\n\t"
+                    "movk %x[prime1], 0x79b1, lsl 32\n\t"
+                    "movk %x[prime1], 0x9e37, lsl 48\n\t"
+                    : [prime1] "=r"(prime1));
 
-            
-                // num3 += (uint64_t)(data64[2] * XXH64_PRIME_2);
-                num3 = (uint64_t)((num3 << 31) | (num3 >> 33)) * XXH64_PRIME_1;
+                asm(
+                    // load prime1
+                    "mov %x[prime2], 0xEB4F\n\t"
+                    "movk %x[prime2], 0x27D4, lsl 16\n\t"
+                    "movk %x[prime2], 0xAE3D, lsl 32\n\t"
+                    "movk %x[prime2], 0xC2B2, lsl 48\n\t"
+                    : [prime2] "=r"(prime2));
+                asm(
+                    // load data from address
+                    "ldp %x[data1], %x[data2], [%[address]]\n\t"
+                    "ldp %x[data3], %x[data4], [%[address], #16]\n\t"
+                    : [data1] "=r"(data1), [data2] "=r"(data2), [data3] "=r"(data3), [data4] "=r"(data4)
+                    : [address] "r"(data64));
 
-                // num4 += (uint64_t)(data64[3] * XXH64_PRIME_2);
-                num4 = (uint64_t)((num4 << 31) | (num4 >> 33)) * XXH64_PRIME_1;
+                asm(
+                    "madd %[num1], %[data1], %[prime2], %[num1]\n\t"
+                    "madd %[num2], %[data2], %[prime2], %[num1]\n\t"
+                    "madd %[num3], %[data3], %[prime2], %[num1]\n\t"
+                    "madd %[num4], %[data4], %[prime2], %[num1]\n\t"
+                    : [num1] "+r"(num1), [num2] "=r"(num2), [num3] "=r"(num3), [num4] "=r"(num4), [data1] "=r"(data1), [data2] "=r"(data2), [data3] "=r"(data3), [data4] "=r"(data4)
+                    : [prime2] "r"(prime2));
 
-                (void)num4;
+                num1 = (num1 << 31 | num1 >> 33);
+                num2 = (num2 << 31 | num2 >> 33);
+                num3 = (num3 << 31 | num3 >> 33);
+                num4 = (num4 << 31 | num4 >> 33);
 
-                num1 += (uint64_t)(data64[4] * XXH64_PRIME_2);
-                num1 = (uint64_t)((num1 << 31) | (num1 >> 33)) * XXH64_PRIME_1;
+                asm(
+                    "madd %[num1], %[num1], %[prime1], %[num1]\n\t"
+                    "madd %[num2], %[num2], %[prime1], %[num2]\n\t"
+                    "madd %[num3], %[num3], %[prime1], %[num3]\n\t"
+                    "madd %[num4], %[num4], %[prime1], %[num4]\n\t"
+                    : [num1] "+r"(num1), [num2] "=r"(num2), [num3] "=r"(num3), [num4] "=r"(num4)
+                    : [prime1] "r"(prime1));
 
-                num2 += (uint64_t)(data64[5] * XXH64_PRIME_2);
-                num2 = (uint64_t)((num2 << 31) | (num2 >> 33)) * XXH64_PRIME_1;
-
-                num3 += (uint64_t)(data64[6] * XXH64_PRIME_2);
-                num3 = (uint64_t)((num3 << 31) | (num3 >> 33)) * XXH64_PRIME_1;
-
-                num4 += (uint64_t)(data64[7] * XXH64_PRIME_2);
-                num4 = (uint64_t)((num4 << 31) | (num4 >> 33)) * XXH64_PRIME_1;
-
-                data64 += 8;
+                data64 += 4;
             }
         }
     }
+
+    XXH64State state = {};
+    state.totalSize = sgl->entryCount * 8192;
     state.acc[0] = num1;
     state.acc[1] = num2;
     state.acc[2] = num3;
@@ -186,123 +183,97 @@ uint64_t SGL_HashValue(SGL *sgl)
     return XXH64_Digest(&state);
 }
 
-
 #include <iostream>
 #include "xxhash.h"
 using namespace std;
-uint64_t multiply_uint64(uint64_t a, uint64_t b)
-{
-    uint32_t a_low = static_cast<uint32_t>(a);
-    uint32_t a_high = static_cast<uint32_t>(a >> 32);
 
-    uint32_t b_low = static_cast<uint32_t>(b);
-    uint32_t b_high = static_cast<uint32_t>(b >> 32);
+// uint64_t SGL_HashValue_Raw(SGL *sgl)
+// {
+//     XXH64_state_t *state = XXH64_createState();
+//     XXH64_reset(state, 0);
+//     for (size_t i = 0; i < sgl->entryCount; i++) {
+//         const uint8_t *entrybuf = sgl->entries[i].buf;
+//         size_t entrylen = sgl->entries[i].len;
+//         for (size_t offset = 0; offset < entrylen; offset += BYTE_PER_SECTOR_PI) {
+//             // prefetch the next block
+//             // __builtin_prefetch(entrybuf + offset + BYTE_PER_SECTOR_PI);
 
+//             // process current block
+//             XXH64_update(state, entrybuf + offset, BYTE_PER_SECTOR_NOPI);
+//         }
+//     }
+//     return XXH64_digest(state);
+// }
 
-    // Calculate high and low parts
-    uint64_t low_product = static_cast<uint64_t>(a_low) * static_cast<uint64_t>(b_low);
-    uint64_t mid_product = static_cast<uint64_t>(a_low) * b_high + static_cast<uint64_t>(a_high) * b_low;
-
-    // // Combine the high and low parts
-    uint64_t result = low_product + (mid_product << 32);
-
-    return result;
-}
-
-
-uint64_t multiply(uint32_t low1, uint32_t high1, uint32_t low2, uint32_t high2)
-{
-    uint32x2_t v1 = vdup_n_u32(low1);
-    uint32x2_t v4 = vdup_n_u32(low2);
-
-    uint32x2_t v2 = { low2, high2 };
-    uint32x2_t v3 = { high1, low1 };
-
-    uint64x2_t low_product = vmull_u32(v1, v4);
-    uint64x2_t mid_product = vmull_u32(v2, v3);
-
-    uint64x1_t low = vget_low_u64(low_product);
-    cout << "multiply low: " << vget_lane_u64(low, 0) << endl;
-    uint64x1_t high = vget_high_u64(mid_product);
-    uint64x1_t sum = vadd_u64(low, high);
-
-    cout << "multiply: "<< vget_lane_u64(sum, 0) << endl;
-
-    sum = vadd_u64(vshl_n_u64(sum, 32), vget_low_u64(low_product));
-
-    return vget_lane_u64(sum, 0);
-}
-
-uint64_t SGL_HashValue_Raw(SGL *sgl)
-{
-    XXH64_state_t *state = XXH64_createState();
-    XXH64_reset(state, 0);
-    for (size_t i = 0; i < sgl->entryCount; i++) {
-        const uint8_t *entrybuf = sgl->entries[i].buf;
-        size_t entrylen = sgl->entries[i].len;
-        for (size_t offset = 0; offset < entrylen; offset += BYTE_PER_SECTOR_PI) {
-            // prefetch the next block
-            // __builtin_prefetch(entrybuf + offset + BYTE_PER_SECTOR_PI);
-
-            // process current block
-            XXH64_update(state, entrybuf + offset, BYTE_PER_SECTOR_NOPI);
-        }
-    }
-
-    return XXH64_digest(state);
-}
-
+#include <iostream>
+#include <vector>
+#include <random>
+#include <algorithm>
 #include <chrono>
-int main()
+
+void generate()
 {
-    SGL sgl;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dis(0, 255);
 
-    constexpr uint32_t len = 8320;
-    sgl.entries[0].buf = new uint8_t[len]();
-    sgl.entries[0].len = len;
+    const int contentSize = 8320;
 
-    sgl.entryCount = 1;
+    std::vector<char> randomContent(contentSize);
+    std::generate_n(randomContent.begin(), contentSize, [&]()
+                    { return static_cast<char>(dis(gen)); });
+}
 
-    uint64_t expected = 0x2b5073505a48fb4;
-    auto ret = SGL_HashValue_Raw(&sgl);
-    if (expected != ret) {
-        cout << "[raw implenment] incorrect!" << endl;
-    }
+constexpr uint32_t DATA_LEN = 8320;
+uint64_t Test(SGL sgl)
+{
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_int_distribution<int> dis(0, 255);
 
-    ret = SGL_HashValue(&sgl);
-    if (expected != ret) {
-        cout << "[my implenment] incorrect!" << endl;
-    }
+    // static std::vector<char> randomContent(DATA_LEN);
+    // std::generate_n(randomContent.begin(), DATA_LEN, [&]()
+    //                 { return static_cast<char>(dis(gen)); });
 
-    cout << "[raw implenment]: ";
+    // std::copy(randomContent.begin(), randomContent.end(), sgl.entries[0].buf);
+
     auto start = std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < 1000; i++) {
-        SGL_HashValue_Raw(&sgl);
+    for (size_t i = 0; i < 10000; i++)
+    {
+        SGL_HashValue(&sgl);
     }
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::cout << "time cost: " << duration.count() << " us" << std::endl;
+    // std::cout << "time cost: " << duration.count() << " us" << std::endl;
+    return duration.count();
+}
 
-    cout << "[my implenment]:";
-    start = std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < 1000; i++) {
-        SGL_HashValue(&sgl);
+int main()
+{
+    SGL sgl;
+
+    sgl.entries[0].buf = new uint8_t[DATA_LEN]();
+    sgl.entries[0].len = DATA_LEN;
+
+    sgl.entryCount = 1;
+
+    uint64_t expected = 0x2b5073505a48fb4;
+    // auto ret = SGL_HashValue_Raw(&sgl);
+    // if (expected != ret) {
+    //     cout << "[raw implenment] incorrect!" << endl;
+    // }
+
+    auto ret = SGL_HashValue(&sgl);
+    if (expected != ret)
+    {
+        cout << "[my implenment] incorrect!" << endl;
     }
 
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::cout << "time cost: " << duration.count() << " us" << std::endl;
-
-    uint64_t a = UINT64_MAX - 1;
-    uint64_t b = UINT64_MAX - 1000;
-
-
-    register uint64_t num1 = XXH64_PRIME_1 + XXH64_PRIME_2;
-    register uint64_t num2 = XXH64_PRIME_2;
-    register uint64_t num3 = 0;
-    register uint64_t num4 = 0 - XXH64_PRIME_1;
-    cout << hex << num1 << endl;
-    cout << hex << num2 << endl;
-    cout << hex << num4 << endl;
+    uint64_t totalCostTimes = 0;
+    for (size_t i = 0; i < 10000; i++)
+    {
+        totalCostTimes += Test(sgl);
+    }
+    std::cout << "time cost: " << totalCostTimes << " us" << std::endl;
 }
